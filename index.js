@@ -59,13 +59,33 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/updated/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updatedData = req.body
+
+            const updatedDoc = {
+                $set: {
+                    postTile: updatedData.postTile,
+                    thumbnail: updatedData.thumbnail,
+                    description: updatedData.description,
+                    needPeoples: updatedData.needPeoples,
+                    location: updatedData.location,
+                    category: updatedData.category,
+                    deadline: updatedData.deadline
+                }
+            }
+            const result = await addPostCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
         //request volunteer 
         app.get('/request', async (req, res) => {
             const cursor = requestCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
-
 
 
         app.post('/request', async (req, res) => {
