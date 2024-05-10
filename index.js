@@ -46,6 +46,13 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/addposts/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const result = await addPostCollection.find(query).toArray()
+            res.send(result)
+        })
+
         app.post('/addpost', async (req, res) => {
             const addPost = req.body;
             const result = await addPostCollection.insertOne(addPost)
@@ -58,6 +65,8 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+
+
 
         app.post('/request', async (req, res) => {
             const addRequest = req.body;
