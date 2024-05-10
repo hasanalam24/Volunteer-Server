@@ -80,6 +80,13 @@ async function run() {
             res.send(result)
         })
 
+        app.delete('/delete/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await addPostCollection.deleteOne(query)
+            res.send(result)
+        })
+
         //request volunteer 
         app.get('/request', async (req, res) => {
             const cursor = requestCollection.find()
