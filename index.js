@@ -30,6 +30,7 @@ async function run() {
 
 
         const addPostCollection = client.db('VolunteerDB').collection('addPostDB')
+        const requestCollection = client.db('VolunteerDB').collection('requestDB')
         // Send a ping to confirm a successful connection
 
         app.get('/addpost', async (req, res) => {
@@ -48,6 +49,19 @@ async function run() {
         app.post('/addpost', async (req, res) => {
             const addPost = req.body;
             const result = await addPostCollection.insertOne(addPost)
+            res.send(result)
+        })
+
+        //request volunteer 
+        app.get('/request', async (req, res) => {
+            const cursor = requestCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.post('/request', async (req, res) => {
+            const addRequest = req.body;
+            const result = await requestCollection.insertOne(addRequest)
             res.send(result)
         })
         await client.db("admin").command({ ping: 1 });
