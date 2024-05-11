@@ -65,11 +65,9 @@ async function run() {
 
 
         //auth related api
-        app.post('/jwt', logger, verifyToken, async (req, res) => {
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
-            // console.log('user for toker', user)
             const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
-
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: true,
@@ -87,14 +85,13 @@ async function run() {
 
 
         //service ralated api
-        app.get('/addpost', logger, verifyToken, async (req, res) => {
-
+        app.get('/addpost', async (req, res) => {
             const cursor = addPostCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/addpost/:id', logger, verifyToken, async (req, res) => {
+        app.get('/addpost/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await addPostCollection.findOne(query)
@@ -102,8 +99,12 @@ async function run() {
         })
 
         app.get('/addposts/:email', logger, verifyToken, async (req, res) => {
+
             const email = req.params.email
-            // console.log('cookcook', req.cookies)
+
+            if (req.user.email !== email) {
+                return res.status(403).send({ message: 'fobidden access' })
+            }
             const query = { email: email }
             const result = await addPostCollection.find(query).toArray()
             res.send(result)
@@ -144,13 +145,13 @@ async function run() {
         })
 
         //request volunteer 
-        app.get('/request', logger, verifyToken, async (req, res) => {
+        app.get('/request', async (req, res) => {
             const cursor = requestCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/request/:email', logger, verifyToken, async (req, res) => {
+        app.get('/request/:email', async (req, res) => {
             const email = req.params.email
             const query = { email: email }
             const result = await requestCollection.find(query).toArray()
