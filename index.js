@@ -1,7 +1,7 @@
 const express = require('express')
-
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express()
@@ -15,6 +15,7 @@ app.use(cors({
     ],
     credentials: true
 }))
+app.use(cookieParser())
 
 
 
@@ -30,6 +31,28 @@ const client = new MongoClient(uri, {
     }
 });
 
+//middlewares
+const logger = (req, res, next) => {
+    // console.log("log info", req.method, req.url)
+    next()
+}
+
+const verifyToken = (req, res, next) => {
+    const token = req?.cookies?.token
+    // console.log('token in the middle ware', token)
+    if (!token) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: 'unauthorized access' })
+        }
+        req.user = decoded
+        next()
+    })
+
+}
+
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
@@ -42,9 +65,9 @@ async function run() {
 
 
         //auth related api
-        app.post('/jwt', async (req, res) => {
+        app.post('/jwt', logger, verifyToken, async (req, res) => {
             const user = req.body;
-            console.log('user for toker', user)
+            // console.log('user for toker', user)
             const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
 
             res.cookie('token', token, {
@@ -58,27 +81,29 @@ async function run() {
 
         app.post('/logout', async (req, res) => {
             const user = req.body;
-            console.log('login out user', user)
+            // console.log('login out user', user)
             res.clearCookie('token', { maxAge: 0 }).send({ success: true })
         })
 
 
+        //service ralated api
+        app.get('/addpost', logger, verifyToken, async (req, res) => {
 
-        app.get('/addpost', async (req, res) => {
             const cursor = addPostCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/addpost/:id', async (req, res) => {
+        app.get('/addpost/:id', logger, verifyToken, async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await addPostCollection.findOne(query)
             res.send(result)
         })
 
-        app.get('/addposts/:email', async (req, res) => {
+        app.get('/addposts/:email', logger, verifyToken, async (req, res) => {
             const email = req.params.email
+            // console.log('cookcook', req.cookies)
             const query = { email: email }
             const result = await addPostCollection.find(query).toArray()
             res.send(result)
@@ -119,13 +144,13 @@ async function run() {
         })
 
         //request volunteer 
-        app.get('/request', async (req, res) => {
+        app.get('/request', logger, verifyToken, async (req, res) => {
             const cursor = requestCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/request/:email', async (req, res) => {
+        app.get('/request/:email', logger, verifyToken, async (req, res) => {
             const email = req.params.email
             const query = { email: email }
             const result = await requestCollection.find(query).toArray()
