@@ -1,13 +1,20 @@
 const express = require('express')
-const app = express()
+
 const cors = require('cors')
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const app = express()
 const port = process.env.PORT || 5000;
 
 // middleware
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: [
+        'http://localhost:5173', 'http://localhost:5174',
+    ],
+    credentials: true
+}))
 
 
 
@@ -32,6 +39,30 @@ async function run() {
         const addPostCollection = client.db('VolunteerDB').collection('addPostDB')
         const requestCollection = client.db('VolunteerDB').collection('requestDB')
         // Send a ping to confirm a successful connection
+
+
+        //auth related api
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            console.log('user for toker', user)
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none'
+            })
+                .send({ success: true })
+
+        })
+
+        app.post('/logout', async (req, res) => {
+            const user = req.body;
+            console.log('login out user', user)
+            res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+        })
+
+
 
         app.get('/addpost', async (req, res) => {
             const cursor = addPostCollection.find()
