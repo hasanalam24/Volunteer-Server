@@ -300,7 +300,7 @@ async function run() {
             }
             const result = await paymentCollection.updateOne(query, updateDB)
 
-            res.send('Payment successful');
+            res.redirect("http://localhost:5173/success")
         });
 
         // await client.db("admin").command({ ping: 1 });
