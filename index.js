@@ -268,7 +268,7 @@ async function run() {
                 if (confirmPay) {
                     res.send({
                         paymentURL: response.data.GatewayPageURL
-                    });
+                    })
                 }
 
 
