@@ -211,12 +211,14 @@ async function run() {
             try {
                 const paymentsInfo = req.body;
 
+                const tranxId = new ObjectId().toString()
+
                 const initiateData = {
                     store_id: "hasan666b38b05c981",
                     store_passwd: "hasan666b38b05c981@ssl",
                     total_amount: paymentsInfo.amount,
                     currency: "EUR",
-                    tran_id: "REF123",
+                    tran_id: tranxId,
                     success_url: "http://localhost:5000/success-payments",
                     fail_url: "http://yoursite.com/fail.php",
                     cancel_url: "http://yoursite.com/cancel.php",
@@ -258,7 +260,7 @@ async function run() {
                 });
 
                 const saveData = {
-                    PaymentId: 'redfaf5sd',
+                    paymentId: tranxId,
                     amount: paymentsInfo.amount,
                     status: 'pending'
                 }
@@ -280,8 +282,24 @@ async function run() {
 
         app.post('/success-payments', async (req, res) => {
             const successData = req.body;
-            console.log('successData:', successData);
+            // console.log('successData:', successData);
             // Handle success data as needed
+
+            if (successData.status !== 'VALID') {
+                throw new Error("Unauthorized payment, Invalid payment")
+            }
+
+            //updated database
+
+            const query = { paymentId: successData.tran_id } //successData k console korle eta pawa jabe initiate er tran_id save kora namee
+
+            const updateDB = {
+                $set: {
+                    status: "Success"
+                }
+            }
+            const result = await paymentCollection.updateOne(query, updateDB)
+
             res.send('Payment successful');
         });
 
