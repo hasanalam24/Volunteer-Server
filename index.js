@@ -303,6 +303,13 @@ async function run() {
             res.redirect("http://localhost:5173/success")
         });
 
+        app.post('/fail', async (req, res) => {
+            res.redirect("http://localhost:5173/fail")
+        })
+        app.post('/cancel', async (req, res) => {
+            res.redirect("http://localhost:5173/cancel")
+        })
+
         // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
