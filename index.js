@@ -219,9 +219,9 @@ async function run() {
                     total_amount: paymentsInfo.amount,
                     currency: "EUR",
                     tran_id: tranxId,
-                    success_url: "http://localhost:5000/success-payments",
-                    fail_url: "http://yoursite.com/fail.php",
-                    cancel_url: "http://yoursite.com/cancel.php",
+                    success_url: "http://localhost:5000/success-payments", //eta 5000 er hobe r success howar user k res.redirect korbo niche success-payment  api route aa
+                    fail_url: "http://localhost:5000/fail",
+                    cancel_url: "http://localhost:5000/cancel",
                     cus_name: "Customer Name",
                     cus_email: "cust@yahoo.com",
                     cus_add1: "Dhaka",
